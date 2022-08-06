@@ -59,8 +59,8 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--dropout', type=float, default=0,
                         help='Dropout probability.')
 
-    parser.add_argument('--act_func', type=str, default='ReLU',
-                        choices=['ReLU', 'LeakyReLU'],
+    parser.add_argument('--act_func', type=str, default='SiLU',
+                        choices=['ReLU', 'ELU', 'LeakyReLU', 'SiLU', 'SELU', 'GELU'],
                         help='Activation function.')
 
     # training arguments

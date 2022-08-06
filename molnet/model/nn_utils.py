@@ -164,6 +164,7 @@ def compute_gnorm(model: nn.Module) -> float:
 def get_activation_function(activation: str) -> nn.Module:
     """
     Gets an activation function module given the name of the activation.
+    https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity
 
     Args:
         activation: The name of the activation function.
@@ -173,7 +174,15 @@ def get_activation_function(activation: str) -> nn.Module:
     """
     if activation == 'ReLU':
         return nn.ReLU()
+    elif activation == 'ELU':
+        return nn.ELU()
     elif activation == 'LeakyReLU':
         return nn.LeakyReLU(0.1)
+    elif activation == 'SELU':
+        return nn.SELU()
+    elif activation == 'SiLU':
+        return nn.SiLU()
+    elif activation == 'GELU':
+        return nn.GELU()
     else:
         raise ValueError(f'Activation "{activation}" not supported.')
