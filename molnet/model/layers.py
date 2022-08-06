@@ -8,9 +8,9 @@ from torch_geometric.nn import MessagePassing
 class DMPNNConv(MessagePassing):
     def __init__(self, args):
         super(DMPNNConv, self).__init__(aggr='add')
-        self.lin = nn.Linear(args.hidden_size, args.hidden_size)
-        self.mlp = nn.Sequential(nn.Linear(args.hidden_size, args.hidden_size),
-                                 nn.BatchNorm1d(args.hidden_size),
+        self.lin = nn.Linear(args.gnn_hidden_size, args.gnn_hidden_size)
+        self.mlp = nn.Sequential(nn.Linear(args.gnn_hidden_size, args.gnn_hidden_size),
+                                 nn.BatchNorm1d(args.gnn_hidden_size),
                                  nn.ReLU())
 
     def forward(self, x, edge_index, edge_attr):
