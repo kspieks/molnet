@@ -55,6 +55,12 @@ class MolGraph:
         for _ in range(self.n_atoms):
             self.a2b.append([])
 
+        # add self loop to account for smiles that only have 1 atom, like C, N, or, O
+        if mol.GetNumBonds() == 0:
+            self.edge_index.extend([(0, 0), (0, 0)])
+            self.f_bonds.append(bond_features(None))
+            self.f_bonds.append(bond_features(None))
+
         # get bond features
         for a1 in range(self.n_atoms):
             for a2 in range(a1 + 1, self.n_atoms):
