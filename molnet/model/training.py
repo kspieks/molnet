@@ -1,8 +1,5 @@
 import math
-from argparse import Namespace
-from typing import List, Union
 
-import numpy as np
 import torch
 from tqdm import tqdm
 
@@ -41,8 +38,8 @@ def train(model, loader, optimizer, loss, scaler, device, max_grad_norm, schedul
         mae_total += (preds - data.y).abs().sum(dim=0).detach().cpu()
 
     # divide by number of molecules
-    train_rmse = math.sqrt(rmse_total / len(loader.dataset))   # rmse with units
-    train_mae = mae_total / len(loader.dataset)                # mae with units
+    train_rmse = torch.sqrt(rmse_total / len(loader.dataset))   # rmse with units
+    train_mae = mae_total / len(loader.dataset)                 # mae with units
 
     return train_rmse, train_mae
 
@@ -64,7 +61,7 @@ def eval(model, loader, scaler, device):
             mae_total += (preds - data.y).abs().sum(dim=0).detach().cpu()
 
     # divide by number of molecules
-    val_rmse = math.sqrt(rmse_total / len(loader.dataset))  # rmse with units
+    val_rmse = torch.sqrt(rmse_total / len(loader.dataset)) # rmse with units
     val_mae = mae_total / len(loader.dataset)               # mae with units
 
     return val_rmse, val_mae, preds_all
