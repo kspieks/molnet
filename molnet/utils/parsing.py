@@ -54,7 +54,7 @@ def parse_command_line_arguments(command_line_args=None):
                         help='Number of layers in FFN after MPN encoding.')
 
     parser.add_argument('--ffn_hidden_size', type=int, default=None,
-                        help='Hidden dim for higher-capacity FFN (defaults to hidden_size).')
+                        help='Hidden dim for higher-capacity FFN (defaults to gnn_hidden_size).')
 
     parser.add_argument('--dropout', type=float, default=0,
                         help='Dropout probability.')
