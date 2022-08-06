@@ -18,7 +18,7 @@ class NoamLR(_LRScheduler):
     course of the remaining total_steps - warmup_steps (where total_steps =
     total_epochs * steps_per_epoch). This is roughly based on the learning rate
     schedule from Attention is All You Need, section 5.3 (https://arxiv.org/abs/1706.03762).
-    
+
     Args:
         optimizer: A PyTorch optimizer.
         warmup_epochs: The number of epochs during which to linearly increase the learning rate.
@@ -91,12 +91,12 @@ class NoamLR(_LRScheduler):
 def build_noam_lr_scheduler(optimizer: Optimizer, args: Namespace, train_data_size: int) -> _LRScheduler:
     """
     Builds a learning rate scheduler.
-    
+
     Args:
         optimizer: The Optimizer whose learning rate will be scheduled.
         args: Arguments.
         train_data_size: The size of the training dataset.
-    
+
     Returns:
         An initialized learning rate scheduler.
     """
@@ -141,10 +141,10 @@ def get_optimizer_and_scheduler(args, model, train_data_size):
 def param_count(model: nn.Module) -> int:
     """
     Determines number of trainable parameters.
-    
+
     Args:
         model: An nn.Module.
-    
+
     Returns:
         The number of trainable parameters.
     """
@@ -167,7 +167,7 @@ def get_activation_function(activation: str) -> nn.Module:
 
     Args:
         activation: The name of the activation function.
-    
+
     Returns:
         The activation function module.
     """
