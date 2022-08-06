@@ -34,6 +34,9 @@ def parse_command_line_arguments(command_line_args=None):
                         choices=['dmpnn', 'gatv2'],
                         help="Type of GNN to use.")
 
+    parser.add_argument('--gat_heads', type=int, default=1,
+                        help='Number of attention heads.')
+
     parser.add_argument('--gnn_hidden_size', type=int, default=300,
                         help='Dimensionality of hidden layers in MPN.')
 
