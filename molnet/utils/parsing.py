@@ -85,7 +85,7 @@ def parse_command_line_arguments(command_line_args=None):
                         help='Batch size.')
 
     parser.add_argument('--optimizer', type=str, default='adam',
-                        choices=['noam'],
+                        choices=['adam'],
                         help='Optimizer to use.')
 
     parser.add_argument('--max_grad_norm', type=float, default=3.0,
