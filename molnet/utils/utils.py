@@ -1,6 +1,8 @@
 import logging
 import os
 
+import numpy as np
+import matplotlib.pyplot as plt
 import torch.nn as nn
 
 
@@ -64,4 +66,30 @@ def create_logger(name, log_dir):
     logger.addHandler(fh)
 
     return logger
+
+
+def plot_train_val_loss(log_file):
+    """
+    Plots the training and validation loss by parsing the log file.
     
+    Args:
+        log_file (str): The path to the log file created during training.
+    """
+    train_loss = []
+    val_loss = []
+    with open(log_file) as f:
+        lines = f.readlines()
+        for line in reversed(lines):
+            if 'Overall Training RMSE' in line:
+                train_loss.append(float(line.split(' ')[-1].split('/')[0].rstrip()))
+            elif 'Overall Validation RMSE' in line and 'Best' not in line:
+                val_loss.append(float(line.split(' ')[-1].split('/')[0].rstrip()))
+
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    ax.plot(np.arange(len(train_loss))[::-1], train_loss, label='Train RMSE')
+    ax.plot(np.arange(len(val_loss))[::-1], val_loss, label='Val RMSE')
+    ax.set_xlabel('Epochs')
+    ax.set_ylabel('RMSE')
+    ax.legend()
+
+    fig.savefig(os.path.join(os.path.dirname(log_file), 'train_val_loss.pdf'), bbox_inches='tight')

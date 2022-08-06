@@ -13,7 +13,8 @@ from molnet.model.nn_utils import (get_optimizer_and_scheduler,
 from molnet.model.model import GNN
 from molnet.model.training import train, eval
 from molnet.utils.utils import (TorchStandardScaler,
-                                create_logger, 
+                                create_logger,
+                                plot_train_val_loss
                                 )
 from molnet.utils.parsing import parse_command_line_arguments
 
@@ -105,3 +106,7 @@ df_preds = pd.DataFrame(preds, columns=[f'{target}_pred' for target in args.targ
 df = pd.concat([df_smi, df_true, df_preds], axis=1)
 preds_path = os.path.join(args.log_dir, 'test_predictions.csv')
 df.to_csv(preds_path, index=False)
+
+# make plots
+log_file = os.path.join(args.log_dir, 'train.log')
+plot_train_val_loss(log_file)
