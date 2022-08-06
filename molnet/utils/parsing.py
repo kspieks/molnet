@@ -4,10 +4,10 @@ from argparse import ArgumentParser
 def parse_command_line_arguments(command_line_args=None):
     """
     Parse command-line arguments.
-    
+
     Args:
         command_line_args: The command line arguments.
-    
+
     Returns:
         The parsed command-line arguments by key words.
     """
@@ -36,7 +36,7 @@ def parse_command_line_arguments(command_line_args=None):
 
     parser.add_argument('--gnn_hidden_size', type=int, default=300,
                         help='Dimensionality of hidden layers in MPN.')
-    
+
     parser.add_argument('--gnn_depth', type=int, default=3,
                         help='Number of message passing steps.')
 
@@ -55,11 +55,10 @@ def parse_command_line_arguments(command_line_args=None):
 
     parser.add_argument('--dropout', type=float, default=0,
                         help='Dropout probability.')
-    
+
     parser.add_argument('--act_func', type=str, default='ReLU',
                         choices=['ReLU', 'LeakyReLU'],
                         help='Activation function.')
-
 
     # training arguments
     parser.add_argument('--seed', type=int, default=0,
@@ -71,24 +70,23 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--warmup_epochs', type=int, default=1,
                         help='Number of epochs during which learning rate increases linearly from init_lr to max_lr.'
                              'Afterwards, learning rate decreases exponentially from max_lr to final_lr.')
-    
+
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate.')
 
     parser.add_argument('--lr_scheduler', type=str, default='noam',
                         choices=['noam'],
                         help='Learning rate scheduler to use.')
-    
+
     parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size.')
-    
+
     parser.add_argument('--optimizer', type=str, default='adam',
                         choices=['noam'],
                         help='Optimizer to use.')
 
     parser.add_argument('--max_grad_norm', type=float, default=3.0,
                         help='Maximum gradient norm (for gradient clipping).')
-    
 
     args = parser.parse_args(command_line_args)
 

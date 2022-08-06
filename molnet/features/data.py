@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch_geometric as tg
-from torch_geometric.data import Dataset, DataLoader
+from torch_geometric.data import DataLoader, Dataset
 
 from .featurization import atom_features, bond_features
 

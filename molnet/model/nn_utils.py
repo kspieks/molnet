@@ -1,7 +1,7 @@
+import math
 from argparse import Namespace
 from typing import List, Union
 
-import math
 import numpy as np
 import torch
 import torch.nn as nn

@@ -2,7 +2,6 @@ from typing import List, Tuple, Union
 
 from rdkit import Chem
 
-
 ATOMIC_SYMBOLS = ['H', 'C', 'N', 'O']
 ATOM_FEATURES = {
     'atomic_symbol': ATOMIC_SYMBOLS,
