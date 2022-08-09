@@ -3,26 +3,26 @@ import os
 
 import pandas as pd
 import torch
-from torch_geometric import seed_everything
 
 from molnet.features.data import construct_loader
-from molnet.model.nn_utils import (get_optimizer_and_scheduler,
-                                   param_count,
-                                   NoamLR,
-                                   )
 from molnet.model.model import GNN
-from molnet.model.training import train, eval
+from molnet.model.nn_utils import (NoamLR,
+                                   get_optimizer_and_scheduler,
+                                   param_count,
+                                   set_seed,
+                                   )
+from molnet.model.training import eval, train
+from molnet.utils.parsing import parse_command_line_arguments
 from molnet.utils.utils import (TorchStandardScaler,
                                 create_logger,
-                                plot_train_val_loss
+                                plot_train_val_loss,
                                 )
-from molnet.utils.parsing import parse_command_line_arguments
 
 
 args = parse_command_line_arguments()
 
 # set seed
-seed_everything(args.seed)
+set_seed(args.seed)
 
 # set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

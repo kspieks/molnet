@@ -1,4 +1,5 @@
 import math
+import random
 from argparse import Namespace
 from typing import List, Union
 
@@ -136,6 +137,21 @@ def get_optimizer_and_scheduler(args, model, train_data_size):
         scheduler = None
 
     return optimizer, scheduler
+
+
+def set_seed(seed):
+    """
+    Sets the seed for generating random numbers in for pseudo-random number 
+    generators in Python.random, numpy, and PyTorch.
+
+    Args:
+        seed (int): The desired seed.
+    """
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def param_count(model: nn.Module) -> int:
