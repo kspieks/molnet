@@ -47,9 +47,16 @@ class MolGraph:
 
         self.n_atoms = mol.GetNumAtoms()
         
+        if not any(a.GetAtomMapNum() for a in mol.GetAtoms()):
+            # this was not an atom-mapped smiles so set an arbitrary atom mapping
+            atomMap = list(range(1, self.n_atoms + 1))
+            for idx in range(self.n_atoms):
+                atom = mol.GetAtomWithIdx(idx)
+                atom.SetAtomMapNum(atomMap[idx])
+
         # get atom features
-        for i, atom in enumerate(mol.GetAtoms()):
-            self.f_atoms.append(atom_features(atom))
+        atoms = sorted(mol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
+        self.f_atoms = [atom_features(atom) for atom in atoms]
 
         # initialize atom to bond mapping for each atom
         for _ in range(self.n_atoms):
@@ -64,7 +71,9 @@ class MolGraph:
         # get bond features
         for a1 in range(self.n_atoms):
             for a2 in range(a1 + 1, self.n_atoms):
-                bond = mol.GetBondBetweenAtoms(a1, a2)
+                rdkit_idx1 = atoms[a1].GetIdx()
+                rdkit_idx2 = atoms[a2].GetIdx()
+                bond = mol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
 
                 if bond is None:
                     continue
