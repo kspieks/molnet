@@ -39,7 +39,7 @@ class GNN(nn.Module):
             elif self.gnn_type == 'gatv2':
                 self.convs.append(GATv2Conv(in_channels=self.gnn_hidden_size,
                                             out_channels=self.gnn_hidden_size,
-                                            heads=args.gat_heads, 
+                                            heads=args.gat_heads,
                                             edge_dim=self.gnn_hidden_size)
                 )
             else:
