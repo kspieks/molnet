@@ -198,5 +198,5 @@ def construct_loader(args, modes=('train', 'val')):
 
     if len(loaders) == 1:
         return loaders[0]
-    else:
-        return loaders
+    
+    return loaders
