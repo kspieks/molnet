@@ -7,6 +7,21 @@ from .nn_utils import NoamLR, compute_gnorm, compute_pnorm
 
 
 def train(model, loader, optimizer, loss, scaler, device, max_grad_norm, scheduler, logger=None):
+    """
+    Function used for training the model.
+
+    Args:
+        model: model to be trained
+        loader: instance of PyTorch Geometric data loader
+        optimizer: a PyTorch optimizer
+        loss: a PyTorch loss function
+        scaler: a standard scaler used to z-score data
+        device: the device
+        max_grad_norm: max norm used for gradient clipping
+        scheduler: learning rate scheduler
+        logger: the logger object
+    """
+
     model.train()
     rmse_total, mae_total = 0, 0
 
@@ -45,6 +60,16 @@ def train(model, loader, optimizer, loss, scaler, device, max_grad_norm, schedul
 
 
 def test(model, loader, scaler, device):
+    """
+    Function used for evaluating the model on val and test sets.
+
+    Args:
+        model: model to be evaluated
+        loader: instance of PyTorch Geometric data loader
+        scaler: a standard scaler used to z-score data
+        device: the device
+    """
+
     model.eval()
     rmse_total, mae_total = 0, 0
     preds_all = []
