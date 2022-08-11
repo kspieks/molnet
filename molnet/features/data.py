@@ -63,6 +63,7 @@ class MolGraph:
         # Convert smiles to molecule
         mol = make_rdkitmol(smi, args.remove_Hs, args.add_Hs)
 
+        # define number of atoms
         self.n_atoms = mol.GetNumAtoms()
 
         if not any(a.GetAtomMapNum() for a in mol.GetAtoms()):
@@ -76,11 +77,7 @@ class MolGraph:
         atoms = sorted(mol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
         self.f_atoms = [atom_features(atom) for atom in atoms]
 
-        # initialize atom to bond mapping for each atom
-        for _ in range(self.n_atoms):
-            self.a2b.append([])
-
-        # add self loop to account for smiles that only have 1 atom, like C, N, or, O
+        # add self loop to account for smiles that only have 1 atom
         if mol.GetNumBonds() == 0:
             self.edge_index.extend([(0, 0), (0, 0)])
             self.f_bonds.append(bond_features(None))
@@ -95,23 +92,14 @@ class MolGraph:
 
                 if bond is None:
                     continue
-                    
+
+                # create directional graph
                 self.edge_index.extend([(a1, a2), (a2, a1)])
+                self.n_bonds += 2
 
                 f_bond = bond_features(bond)
                 self.f_bonds.append(f_bond)
                 self.f_bonds.append(f_bond)
-
-                # Update index mappings
-                b1 = self.n_bonds
-                b2 = b1 + 1
-                self.a2b[a2].append(b1)  # b1 = a1 --> a2
-                self.b2a.append(a1)
-                self.a2b[a1].append(b2)  # b2 = a2 --> a1
-                self.b2a.append(a2)
-                self.b2revb.append(b2)
-                self.b2revb.append(b1)
-                self.n_bonds += 2
 
 
 class MolDataset(Dataset):
