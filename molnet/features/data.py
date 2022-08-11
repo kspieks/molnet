@@ -60,46 +60,110 @@ class MolGraph:
         self.b2revb = []    # mapping from bond index to the index of the reverse bond
         self.edge_index = []    # list of tuples indicating presence of bonds
 
-        # Convert smiles to molecule
-        mol = make_rdkitmol(smi, args.remove_Hs, args.add_Hs)
+        # property prediction of individual molecules
+        if not args.cgr:
+            # Convert smiles to molecule
+            mol = make_rdkitmol(smi, args.remove_Hs, args.add_Hs)
 
-        # define number of atoms
-        self.n_atoms = mol.GetNumAtoms()
+            # define number of atoms
+            self.n_atoms = mol.GetNumAtoms()
 
-        if not any(a.GetAtomMapNum() for a in mol.GetAtoms()):
-            # this was not an atom-mapped smiles so set an arbitrary atom mapping
-            atomMap = list(range(1, self.n_atoms + 1))
-            for idx in range(self.n_atoms):
-                atom = mol.GetAtomWithIdx(idx)
-                atom.SetAtomMapNum(atomMap[idx])
+            if not any(a.GetAtomMapNum() for a in mol.GetAtoms()):
+                # this was not an atom-mapped smiles so set an arbitrary atom mapping
+                atomMap = list(range(1, self.n_atoms + 1))
+                for idx in range(self.n_atoms):
+                    atom = mol.GetAtomWithIdx(idx)
+                    atom.SetAtomMapNum(atomMap[idx])
 
-        # get atom features
-        atoms = sorted(mol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
-        self.f_atoms = [atom_features(atom) for atom in atoms]
+            # get atom features
+            atoms = sorted(mol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
+            self.f_atoms = [atom_features(atom) for atom in atoms]
 
-        # add self loop to account for smiles that only have 1 atom
-        if mol.GetNumBonds() == 0:
-            self.edge_index.extend([(0, 0), (0, 0)])
-            self.f_bonds.append(bond_features(None))
-            self.f_bonds.append(bond_features(None))
+            # add self loop to account for smiles that only have 1 atom
+            if mol.GetNumBonds() == 0:
+                self.edge_index.extend([(0, 0), (0, 0)])
+                self.f_bonds.append(bond_features(None))
+                self.f_bonds.append(bond_features(None))
 
-        # get bond features
-        for a1 in range(self.n_atoms):
-            for a2 in range(a1 + 1, self.n_atoms):
-                rdkit_idx1 = atoms[a1].GetIdx()
-                rdkit_idx2 = atoms[a2].GetIdx()
-                bond = mol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
+            # get bond features
+            for a1 in range(self.n_atoms):
+                for a2 in range(a1 + 1, self.n_atoms):
+                    rdkit_idx1 = atoms[a1].GetIdx()
+                    rdkit_idx2 = atoms[a2].GetIdx()
+                    bond = mol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
 
-                if bond is None:
-                    continue
+                    if bond is None:
+                        continue
 
-                # create directional graph
-                self.edge_index.extend([(a1, a2), (a2, a1)])
-                self.n_bonds += 2
+                    # create directional graph
+                    self.edge_index.extend([(a1, a2), (a2, a1)])
+                    self.n_bonds += 2
 
-                f_bond = bond_features(bond)
-                self.f_bonds.append(f_bond)
-                self.f_bonds.append(f_bond)
+                    f_bond = bond_features(bond)
+                    self.f_bonds.append(f_bond)
+                    self.f_bonds.append(f_bond)
+
+        # reaction mode using CGR to represent reactant and product
+        else:
+            # Convert smiles to molecule
+            rmol = make_rdkitmol(smi.split('>')[0], args.remove_Hs, args.add_Hs)
+            pmol = make_rdkitmol(smi.split('>')[-1], args.remove_Hs, args.add_Hs)
+
+            # define number of atoms
+            if rmol.GetNumAtoms() != pmol.GetNumAtoms():
+                raise Exception(
+                    f'Reactand and product from {smi} had different number of atoms!\n'
+                    f'CGR mode requires balanced reactions!'
+                )
+            self.n_atoms = rmol.GetNumAtoms()
+
+            if (not any(a.GetAtomMapNum() for a in rmol.GetAtoms()) or 
+                not any(a.GetAtomMapNum() for a in pmol.GetAtoms())):
+                # these were not atom-mapped smiles
+                raise Exception(
+                    f'{smi} is missing atom map numbers!\n'
+                    f'CGR mode requires atom-mapped smiles!'
+                )
+
+            # get atom features for each molecule
+            r_atoms = sorted(rmol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
+            p_atoms = sorted(pmol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
+            if [a.GetSymbol() for a in r_atoms] != [a.GetSymbol() for a in p_atoms]:
+                raise Exception(f'Atom-mapping is not correct for {smi}')
+            f_atoms_reac = [atom_features(atom) for atom in r_atoms]
+            f_atoms_prod = [atom_features(atom) for atom in p_atoms]
+
+            # create the diff feature vector
+            f_atoms_diff = [list(map(lambda x, y: y - x, ii, jj)) for ii, jj in zip(f_atoms_reac, f_atoms_prod)]
+
+            # reac_diff mode
+            self.f_atoms = [x + y for x, y in zip(f_atoms_reac, f_atoms_diff)]
+
+            # get bond features
+            for a1 in range(self.n_atoms):
+                for a2 in range(a1 + 1, self.n_atoms):
+                    rdkit_idx1 = r_atoms[a1].GetIdx()
+                    rdkit_idx2 = r_atoms[a2].GetIdx()
+                    bond_reac = rmol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
+                    bond_prod = pmol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
+
+                    if bond_reac is None and bond_prod is None:
+                        continue
+
+                    # get bond features for each molecule and create diff feature vector
+                    f_bond_reac = bond_features(bond_reac)
+                    f_bond_prod = bond_features(bond_prod)
+                    f_bond_diff = [y - x for x, y in zip(f_bond_reac, f_bond_prod)]
+
+                    # reac_diff mode
+                    f_bond = f_bond_reac + f_bond_diff
+
+                    # create directional graph
+                    self.edge_index.extend([(a1, a2), (a2, a1)])
+                    self.n_bonds += 2
+
+                    self.f_bonds.append(f_bond)
+                    self.f_bonds.append(f_bond)
 
 
 class MolDataset(Dataset):

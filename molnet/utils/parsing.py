@@ -27,6 +27,9 @@ def parse_command_line_arguments(command_line_args=None):
                         help='Name of columns to use as target labels.')
 
     # model arguments
+    parser.add_argument('--cgr', action='store_true', default=False,
+                        help='Boolean indicating whether to use CGR. Use for predicting reaction properties.')
+
     parser.add_argument('--remove_Hs', action='store_true', default=False,
                         help='Boolean indicating whether to remove explicit hydrogens. Do not use for reaction mode.')
 
