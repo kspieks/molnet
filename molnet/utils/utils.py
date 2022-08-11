@@ -71,7 +71,7 @@ def create_logger(name, log_dir):
 def plot_train_val_loss(log_file):
     """
     Plots the training and validation loss by parsing the log file.
-    
+
     Args:
         log_file (str): The path to the log file created during training.
     """
@@ -85,7 +85,7 @@ def plot_train_val_loss(log_file):
             elif 'Overall Validation RMSE' in line and 'Best' not in line:
                 val_loss.append(float(line.split(' ')[-1].split('/')[0].rstrip()))
 
-    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    fig, ax = plt.subplots(1, 1)
     ax.plot(np.arange(len(train_loss))[::-1], train_loss, label='Train RMSE')
     ax.plot(np.arange(len(val_loss))[::-1], val_loss, label='Val RMSE')
     ax.set_xlabel('Epochs')
@@ -93,3 +93,78 @@ def plot_train_val_loss(log_file):
     ax.legend()
 
     fig.savefig(os.path.join(os.path.dirname(log_file), 'train_val_loss.pdf'), bbox_inches='tight')
+
+
+def plot_lr(log_file):
+    """
+    Plots the learning rate by parsing the log file.
+
+    Args:
+        log_file (str): The path to the log file created during training.
+    """
+    lr = []
+    with open(log_file) as f:
+        lines = f.readlines()
+        for line in reversed(lines):
+            if 'lr_0' in line:
+                lr.append(float(line.split(' ')[-1].rstrip()))
+            if 'Steps per epoch:' in line:
+                steps_per_epoch = line.split(' ')[-1].rstrip()
+
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(np.arange(len(lr))[::-1], lr)
+    ax.set_xlabel(f'Steps (steps per epoch: {steps_per_epoch})')
+    ax.set_ylabel('Learning Rate')
+    ax.set_yscale('log')
+    fig.savefig(os.path.join(os.path.dirname(log_file), 'learning_rate.pdf'), bbox_inches='tight')
+
+
+def plot_gnorm(log_file):
+    """
+    Plots the gradient norm by parsing the log file.
+
+    Args:
+        log_file (str): The path to the log file created during training.
+    """
+    gnorm = []
+    with open(log_file) as f:
+        lines = f.readlines()
+        for line in reversed(lines):
+            if 'PNorm' in line:
+                # split gives ['Training', 'RMSE:', '0.00327,', 'PNorm:', '127.8966,', 'GNorm:', '2.5143']
+                gnorm.append(float(line.split()[6].rstrip(',')))
+            if 'Steps per epoch:' in line:
+                steps_per_epoch = line.split()[-1].rstrip()
+                break
+
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(np.arange(len(gnorm))[::-1], gnorm)
+    ax.set_xlabel(f'Steps (steps per epoch: {steps_per_epoch})')
+    ax.set_ylabel('Gradient Norm')
+    ax.set_yscale('log')
+    fig.savefig(os.path.join(os.path.dirname(log_file), 'gnorm.pdf'), bbox_inches='tight')
+
+
+def plot_pnorm(log_file):
+    """
+    Plots the parameter norm by parsing the log file.
+
+    Args:
+        log_file (str): The path to the log file created during training.
+    """
+    pnorm = []
+    with open(log_file) as f:
+        lines = f.readlines()
+        for line in reversed(lines):
+            if 'PNorm' in line:
+                # split gives ['Training', 'RMSE:', '0.00327,', 'PNorm:', '127.8966,', 'GNorm:', '2.5143']
+                pnorm.append(float(line.split()[4].rstrip(',')))
+            if 'Steps per epoch:' in line:
+                steps_per_epoch = line.split()[-1].rstrip()
+                break
+
+    fig, ax = plt.subplots(1, 1)
+    ax.plot(np.arange(len(pnorm))[::-1], pnorm)
+    ax.set_xlabel(f'Steps (steps per epoch: {steps_per_epoch})')
+    ax.set_ylabel('Parameter Norm')
+    fig.savefig(os.path.join(os.path.dirname(log_file), 'pnorm.pdf'), bbox_inches='tight')

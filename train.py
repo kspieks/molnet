@@ -16,6 +16,9 @@ from molnet.utils.parsing import parse_command_line_arguments
 from molnet.utils.utils import (TorchStandardScaler,
                                 create_logger,
                                 plot_train_val_loss,
+                                plot_lr,
+                                plot_gnorm,
+                                plot_pnorm,
                                 )
 
 
@@ -64,7 +67,7 @@ best_epoch = 0
 
 logger.info("Starting training...")
 for epoch in range(1, args.n_epochs+1):
-    train_rmse, train_mae = train(model, train_loader, optimizer, loss, scaler, device, args.max_grad_norm, scheduler)
+    train_rmse, train_mae = train(model, train_loader, optimizer, loss, scaler, device, args.max_grad_norm, scheduler, logger)
     logger.info(f'Epoch {epoch}: Overall Training RMSE/MAE {train_rmse.mean():.5f}/{train_mae.mean():.5f}')
     for target, rmse, mae in zip(args.targets, train_rmse, train_mae):
         logger.info(f'Epoch {epoch}: {target} Training RMSE/MAE {rmse:.5f}/{mae:.5f}')
@@ -110,3 +113,6 @@ df.to_csv(preds_path, index=False)
 # make plots
 log_file = os.path.join(args.log_dir, 'train.log')
 plot_train_val_loss(log_file)
+plot_lr(log_file)
+plot_gnorm(log_file)
+plot_pnorm(log_file)
