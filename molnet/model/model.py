@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 from torch_geometric.nn import (GATv2Conv,
                                 global_add_pool,
@@ -100,7 +100,7 @@ class GNN(nn.Module):
             else:
                 # dmpnn passes messages along the edges
                 x_h, edge_attr_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
-            
+
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 
             if l == self.gnn_depth - 1:
