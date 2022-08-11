@@ -135,7 +135,7 @@ class MolDataset(Dataset):
     def get_smiles(self):
         """Create list of smiles"""
         df = pd.read_csv(self.args.data_path)
-        smiles = df.smi.values
+        smiles = df.smiles.values
 
         return [smiles[i] for i in self.split]
 
