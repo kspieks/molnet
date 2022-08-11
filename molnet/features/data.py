@@ -103,7 +103,13 @@ class MolGraph:
 
 
 class MolDataset(Dataset):
+    """
+    Class for creating the torch geometric dataset.
 
+    Args:
+        args: Command line arguments
+        mode: String indicating "train", "val", or "test" mode.
+    """
     def __init__(self, args, mode='train'):
         super(MolDataset, self).__init__()
 
@@ -186,5 +192,5 @@ def construct_loader(args, modes=('train', 'val')):
 
     if len(loaders) == 1:
         return loaders[0]
-    
+
     return loaders
