@@ -10,6 +10,26 @@ from torch_geometric.data import DataLoader, Dataset
 
 from .featurization import atom_features, bond_features
 
+def make_rdkitmol(smi: str, remove_Hs=True, add_Hs=False):
+    """
+    Builds an RDKit molecule from a SMILES string.
+
+    Args:
+        smi: SMILES string.
+        remove_Hs: Boolean indicating whether to remove explicit Hs.
+                   This does not add Hs. It only keeps them if the smiles has explicit Hs.
+        add_Hs: Boolean indicating whether to add explicit hydrogens.
+    :return: RDKit molecule.
+    """
+    params = Chem.SmilesParserParams()
+    params.removeHs = remove_Hs
+    mol = Chem.MolFromSmiles(smi, params)
+
+    if add_Hs:
+        mol = Chem.AddHs(mol)
+
+    return mol
+
 
 class MolGraph:
     """
@@ -30,7 +50,7 @@ class MolGraph:
     def __init__(self, smiles: str, args: Namespace):
         """Computes the graph structure and featurization of a molecule."""
         self.smiles = smiles    # smiles string
-        
+
         self.n_atoms = 0    # number of atoms
         self.n_bonds = 0    # number of bonds
         self.f_atoms = []   # mapping from atom index to atom features
@@ -41,12 +61,10 @@ class MolGraph:
         self.edge_index = []    # list of tuples indicating presence of bonds
 
         # Convert smiles to molecule
-        params = Chem.SmilesParserParams()
-        params.removeHs = False
-        mol = Chem.MolFromSmiles(smiles, params)
+        mol = make_rdkitmol(smi, args.remove_Hs, args.add_Hs)
 
         self.n_atoms = mol.GetNumAtoms()
-        
+
         if not any(a.GetAtomMapNum() for a in mol.GetAtoms()):
             # this was not an atom-mapped smiles so set an arbitrary atom mapping
             atomMap = list(range(1, self.n_atoms + 1))

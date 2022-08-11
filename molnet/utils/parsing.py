@@ -26,10 +26,13 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--targets', nargs='+',
                         help='Name of columns to use as target labels.')
 
-    parser.add_argument('--num_workers', type=int, default=0,
-                        help='Number of workers for the parallel data loading (0 means sequential).')
-
     # model arguments
+    parser.add_argument('--remove_Hs', action='store_true', default=False,
+                        help='Boolean indicating whether to remove explicit hydrogens. Do not use for reaction mode.')
+
+    parser.add_argument('--add_Hs', action='store_true', default=False,
+                        help='Boolean indicating whether to add explicit hydrogens. Do not use for reaction mode.')
+
     parser.add_argument('--gnn_type', type=str, default='dmpnn',
                         choices=['dmpnn', 'gatv2'],
                         help="Type of GNN to use.")
@@ -47,7 +50,7 @@ def parse_command_line_arguments(command_line_args=None):
                         choices=['sum', 'mean', 'max'],
                         help='How to aggregate atom representations to molecule representation.')
 
-    parser.add_argument('--aggregation_norm', type=int, default=None,  # use 50
+    parser.add_argument('--aggregation_norm', type=int, default=None,
                         help='Number by which to divide summed up atomic features.')
 
     parser.add_argument('--ffn_depth', type=int, default=3,
@@ -64,6 +67,9 @@ def parse_command_line_arguments(command_line_args=None):
                         help='Activation function.')
 
     # training arguments
+    parser.add_argument('--num_workers', type=int, default=0,
+                        help='Number of workers for the parallel data loading (0 means sequential).')
+
     parser.add_argument('--seed', type=int, default=0,
                         help='Sets the seed for generating random numbers in PyTorch, numpy and Python.')
 
