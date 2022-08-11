@@ -44,7 +44,7 @@ def train(model, loader, optimizer, loss, scaler, device, max_grad_norm, schedul
     return train_rmse, train_mae
 
 
-def eval(model, loader, scaler, device):
+def test(model, loader, scaler, device):
     model.eval()
     rmse_total, mae_total = 0, 0
     preds_all = []

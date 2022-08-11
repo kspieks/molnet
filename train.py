@@ -11,7 +11,7 @@ from molnet.model.nn_utils import (NoamLR,
                                    param_count,
                                    set_seed,
                                    )
-from molnet.model.training import eval, train
+from molnet.model.training import test, train
 from molnet.utils.parsing import parse_command_line_arguments
 from molnet.utils.utils import (TorchStandardScaler,
                                 create_logger,
@@ -72,7 +72,7 @@ for epoch in range(1, args.n_epochs+1):
     for target, rmse, mae in zip(args.targets, train_rmse, train_mae):
         logger.info(f'Epoch {epoch}: {target} Training RMSE/MAE {rmse:.5f}/{mae:.5f}')
 
-    val_rmse, val_mae, _ = eval(model, val_loader, scaler, device)
+    val_rmse, val_mae, _ = test(model, val_loader, scaler, device)
     logger.info(f'Epoch {epoch}: Overall Validation RMSE/MAE {val_rmse.mean():.5f}/{val_mae.mean():.5f}')
     for target, rmse, mae in zip(args.targets, val_rmse, val_mae):
         logger.info(f'Epoch {epoch}: {target} Validation RMSE/MAE {rmse:.5f}/{mae:.5f}')
@@ -94,7 +94,7 @@ state_dict = torch.load(os.path.join(args.log_dir, 'best_model.pt'), map_locatio
 model.load_state_dict(state_dict)
 
 # predict test data
-test_rmse, test_mae, preds = eval(model, test_loader, scaler, device)
+test_rmse, test_mae, preds = test(model, test_loader, scaler, device)
 logger.info(f'Overall Testing RMSE/MAE {test_rmse.mean():.5f}/{test_mae.mean():.5f}')
 for target, rmse, mae in zip(args.targets, test_rmse, test_mae):
     logger.info(f'{target} Testing RMSE/MAE {rmse:.5f}/{mae:.5f}')
