@@ -206,9 +206,14 @@ class MolDataset(Dataset):
 
     def get_dims(self):
         """Get input dimensions for the node and edge features"""
-        test_graph = MolGraph(smi='[H][H]', args=self.args)
-        node_dim = len(test_graph.f_atoms[0])
-        edge_dim = len(test_graph.f_bonds[0])
+        if self.args.cgr:
+            test_graph = MolGraph(smi='[H:2].[C:1]([H:3])([H:4])[H:4]>>[H:2][C:1]([H:3])([H:4])[H:4]', args=self.args)
+            node_dim = len(test_graph.f_atoms[0])
+            edge_dim = len(test_graph.f_bonds[0])
+        else:
+            test_graph = MolGraph(smi='[H][H]', args=self.args)
+            node_dim = len(test_graph.f_atoms[0])
+            edge_dim = len(test_graph.f_bonds[0])
 
         return node_dim, edge_dim
 
