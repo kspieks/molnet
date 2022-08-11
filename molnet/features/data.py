@@ -36,7 +36,7 @@ class MolGraph:
     A MolGraph represents the graph structure and featurization of a single molecule.
 
     A MolGraph computes the following attributes:
-    - smiles: Smiles string.
+    - smi: Smiles string.
     - n_atoms: The number of atoms in the molecule.
     - n_bonds: The number of bonds in the molecule.
     - f_atoms: A mapping from an atom index to a list atom features.
@@ -47,9 +47,9 @@ class MolGraph:
     - edge_index: A list of tuples indicating presence of bonds.
     """
 
-    def __init__(self, smiles: str, args: Namespace):
+    def __init__(self, smi: str, args: Namespace):
         """Computes the graph structure and featurization of a molecule."""
-        self.smiles = smiles    # smiles string
+        self.smiles = smi   # smiles string
 
         self.n_atoms = 0    # number of atoms
         self.n_bonds = 0    # number of bonds
