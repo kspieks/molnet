@@ -1,4 +1,5 @@
 # molnet
+The Molecule Network repo uses PyTorch Geometric to easily implement several graph architectures for predicting properties of molecules or reactions.
 
 ## Installation
 First, clone the repository:
