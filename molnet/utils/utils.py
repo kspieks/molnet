@@ -9,7 +9,7 @@ from torch import nn
 class TorchStandardScaler(nn.Module):
     """
     StandardScaler class to z-score data.
-    
+
     Args:
         eps: tolerance to avoid dividing by 0.
     """
