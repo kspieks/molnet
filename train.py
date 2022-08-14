@@ -1,3 +1,4 @@
+import json
 import math
 import os
 
@@ -22,7 +23,7 @@ from molnet.utils.utils import (TorchStandardScaler,
                                 )
 
 
-args = parse_command_line_arguments()
+args, config_dict = parse_command_line_arguments()
 
 # set seed
 set_seed(args.seed)
@@ -44,7 +45,10 @@ scaler = TorchStandardScaler()
 targets = torch.tensor(train_loader.dataset.targets, requires_grad=False)
 scaler.fit(targets)
 
-model = GNN(args, train_loader.dataset.node_dim, train_loader.dataset.edge_dim).to(device)
+# save the model arguments
+with open('model_config.json', 'w') as f:
+    json.dump(config_dict['model_config'], f)
+model = GNN(**config_dict['model_config']).to(device)
 
 # get optimizer and scheduler and define loss
 optimizer, scheduler = get_optimizer_and_scheduler(args, model, len(train_loader.dataset))

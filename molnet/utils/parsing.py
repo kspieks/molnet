@@ -26,7 +26,7 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--targets', nargs='+',
                         help='Name of columns to use as target labels.')
 
-    # model arguments
+    # featurization arguments
     parser.add_argument('--cgr', action='store_true', default=False,
                         help='Boolean indicating whether to use CGR. Use for predicting reaction properties.')
 
@@ -36,36 +36,38 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--add_Hs', action='store_true', default=False,
                         help='Boolean indicating whether to add explicit hydrogens. Do not use for reaction mode.')
 
-    parser.add_argument('--gnn_type', type=str, default='dmpnn',
+    # model arguments
+    model_config = parser.add_argument_group('model_config')
+    model_config.add_argument('--gnn_type', type=str, default='dmpnn',
                         choices=['dmpnn', 'gatv2'],
                         help="Type of GNN to use.")
 
-    parser.add_argument('--gat_heads', type=int, default=1,
+    model_config.add_argument('--gat_heads', type=int, default=1,
                         help='Number of attention heads.')
 
-    parser.add_argument('--gnn_hidden_size', type=int, default=300,
+    model_config.add_argument('--gnn_hidden_size', type=int, default=300,
                         help='Dimensionality of hidden layers in MPN.')
 
-    parser.add_argument('--gnn_depth', type=int, default=3,
+    model_config.add_argument('--gnn_depth', type=int, default=3,
                         help='Number of message passing steps.')
 
-    parser.add_argument('--graph_pool', type=str, default='sum',
+    model_config.add_argument('--graph_pool', type=str, default='sum',
                         choices=['sum', 'mean', 'max'],
                         help='How to aggregate atom representations to molecule representation.')
 
-    parser.add_argument('--aggregation_norm', type=int, default=None,
+    model_config.add_argument('--aggregation_norm', type=int, default=None,  # use 50
                         help='Number by which to divide summed up atomic features.')
 
-    parser.add_argument('--ffn_depth', type=int, default=3,
+    model_config.add_argument('--ffn_depth', type=int, default=3,
                         help='Number of layers in FFN after MPN encoding.')
 
-    parser.add_argument('--ffn_hidden_size', type=int, default=None,
+    model_config.add_argument('--ffn_hidden_size', type=int, default=None,
                         help='Hidden dim for higher-capacity FFN (defaults to gnn_hidden_size).')
 
-    parser.add_argument('--dropout', type=float, default=0,
+    model_config.add_argument('--dropout', type=float, default=0,
                         help='Dropout probability.')
 
-    parser.add_argument('--act_func', type=str, default='SiLU',
+    model_config.add_argument('--act_func', type=str, default='SiLU',
                         choices=['ReLU', 'ELU', 'LeakyReLU', 'SiLU', 'SELU', 'GELU'],
                         help='Activation function.')
 
@@ -105,4 +107,11 @@ def parse_command_line_arguments(command_line_args=None):
     if args.ffn_hidden_size is None:
         args.ffn_hidden_size = args.gnn_hidden_size
 
-    return args
+    config_dict = dict({})
+    group_list = ['model_config']
+    for group in parser._action_groups:
+        if group.title in group_list:
+            config_dict[group.title] = {a.dest:getattr(args, a.dest, None) for a in group._group_actions}
+    config_dict['model_config']['num_targets'] = len(args.targets)
+
+    return args, config_dict

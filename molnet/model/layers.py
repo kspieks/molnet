@@ -6,11 +6,11 @@ from torch_geometric.nn import MessagePassing
 
 
 class DMPNNConv(MessagePassing):
-    def __init__(self, args):
+    def __init__(self, gnn_hidden_size=300):
         super(DMPNNConv, self).__init__(aggr='add')
-        self.lin = nn.Linear(args.gnn_hidden_size, args.gnn_hidden_size)
-        self.mlp = nn.Sequential(nn.Linear(args.gnn_hidden_size, args.gnn_hidden_size),
-                                 nn.BatchNorm1d(args.gnn_hidden_size),
+        self.lin = nn.Linear(gnn_hidden_size, gnn_hidden_size)
+        self.mlp = nn.Sequential(nn.Linear(gnn_hidden_size, gnn_hidden_size),
+                                 nn.BatchNorm1d(gnn_hidden_size),
                                  nn.ReLU())
 
     def forward(self, x, edge_index, edge_attr):

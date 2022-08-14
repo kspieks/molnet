@@ -12,21 +12,35 @@ from .nn_utils import get_activation_function
 
 
 class GNN(nn.Module):
-    def __init__(self, args, num_node_features, num_edge_features):
+    def __init__(self,
+                 num_node_features,
+                 num_edge_features,
+                 gnn_depth=3,
+                 gnn_hidden_size=300,
+                 gnn_type='dmpnn',
+                 gat_heads=1,
+                 graph_pool='sum',
+                 aggregation_norm=None,
+                 dropout=0.0,
+                 act_func='SiLU',
+                 ffn_depth=3,
+                 ffn_hidden_size=300,
+                 num_targets=1,
+                 ):
         super(GNN, self).__init__()
 
-        self.args = args
-        self.gnn_depth = args.gnn_depth
-        self.gnn_hidden_size = args.gnn_hidden_size
-        self.gnn_type = args.gnn_type
-        self.graph_pool = args.graph_pool
+        self.gnn_depth = gnn_depth
+        self.gnn_hidden_size = gnn_hidden_size
+        self.gnn_type = gnn_type
+        self.graph_pool = graph_pool
+        self.aggregation_norm = aggregation_norm
 
-        self.dropout = nn.Dropout(args.dropout)
-        self.activation = get_activation_function(args.act_func)
+        self.dropout = nn.Dropout(dropout)
+        self.activation = get_activation_function(act_func)
 
         if self.gnn_type == 'dmpnn':
             self.edge_init = nn.Linear(num_node_features + num_edge_features, self.gnn_hidden_size)
-            self.edge_to_node = DMPNNConv(args)
+            self.edge_to_node = DMPNNConv(gnn_hidden_size=self.gnn_hidden_size)
         else:
             self.node_init = nn.Linear(num_node_features, self.gnn_hidden_size)
             self.edge_init = nn.Linear(num_edge_features, self.gnn_hidden_size)
@@ -35,11 +49,11 @@ class GNN(nn.Module):
         self.convs = torch.nn.ModuleList()
         for _ in range(self.gnn_depth):
             if self.gnn_type == 'dmpnn':
-                self.convs.append(DMPNNConv(args))
+                self.convs.append(DMPNNConv(gnn_hidden_size=self.gnn_hidden_size))
             elif self.gnn_type == 'gatv2':
                 self.convs.append(GATv2Conv(in_channels=self.gnn_hidden_size,
                                             out_channels=self.gnn_hidden_size,
-                                            heads=args.gat_heads,
+                                            heads=gat_heads,
                                             edge_dim=self.gnn_hidden_size)
                 )
             else:
@@ -49,31 +63,31 @@ class GNN(nn.Module):
             self.pool = global_add_pool
         elif self.graph_pool == "mean":
             self.pool = global_mean_pool
-        elif args.graph_pool == "max":
+        elif self.graph_pool == "max":
             self.pool = global_max_pool
         else:
             raise ValueError("Invalid graph pooling type.")
 
         # ffn layers
         ffn = []
-        if args.ffn_depth == 1:
+        if ffn_depth == 1:
             ffn.append(self.dropout)
-            ffn.append(nn.Linear(args.gnn_hidden_size, len(args.targets)))
+            ffn.append(nn.Linear(self.gnn_hidden_size, num_targets))
         else:
             ffn.append(self.dropout)
-            ffn.append(nn.Linear(args.gnn_hidden_size, args.ffn_hidden_size))
+            ffn.append(nn.Linear(self.gnn_hidden_size, ffn_hidden_size))
 
-            for _ in range(args.ffn_depth - 2):
+            for _ in range(ffn_depth - 2):
                 ffn.extend([
                     self.activation,
                     self.dropout,
-                    nn.Linear(args.ffn_hidden_size, args.ffn_hidden_size),
+                    nn.Linear(ffn_hidden_size, ffn_hidden_size),
                 ])
 
             ffn.extend([
                 self.activation,
                 self.dropout,
-                nn.Linear(args.ffn_hidden_size, len(args.targets)),
+                nn.Linear(ffn_hidden_size, num_targets),
             ])
         self.ffn = nn.Sequential(*ffn)
 
@@ -119,8 +133,8 @@ class GNN(nn.Module):
         if self.gnn_type == 'dmpnn':
             h, _ = self.edge_to_node(x_list[-1], edge_index, h)
 
-        if self.args.aggregation_norm:
-            h = self.pool(h, batch) / self.args.aggregation_norm
+        if self.aggregation_norm:
+            h = self.pool(h, batch) / self.aggregation_norm
         else:
             h = self.pool(h, batch)
 
