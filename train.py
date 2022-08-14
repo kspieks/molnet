@@ -96,7 +96,7 @@ logger.info(f'\nCompleted {args.n_epochs} epochs. Done with training.\n')
 logger.info(f'Best Overall Validation RMSE {best_val_rmse:.5f} on Epoch {best_epoch}')
 
 # load best model
-model = GNN(args, train_loader.dataset.node_dim, train_loader.dataset.edge_dim).to(device)
+model = GNN(**model_config).to(device)
 state_dict = torch.load(os.path.join(args.log_dir, 'best_model.pt'), map_location=device)
 model.load_state_dict(state_dict)
 
