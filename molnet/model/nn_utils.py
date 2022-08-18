@@ -154,6 +154,20 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
 
 
+def initialize_weights(model):
+    """
+    Initializes the weights of a model in place.
+
+    Args:
+        model: An nn.Module.
+    """
+    for param in model.parameters():
+        if param.dim() == 1:
+            nn.init.constant_(param, 0)
+        else:
+            nn.init.xavier_normal_(param)
+
+
 def param_count(model: nn.Module) -> int:
     """
     Determines number of trainable parameters.

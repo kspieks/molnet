@@ -9,6 +9,7 @@ from molnet.features.data import construct_loader
 from molnet.model.model import MolNet
 from molnet.model.nn_utils import (NoamLR,
                                    get_optimizer_and_scheduler,
+                                   initialize_weights,
                                    param_count,
                                    set_seed,
                                    )
@@ -60,6 +61,7 @@ else:
     with open('model_config.json', 'w') as f:
         json.dump(model_config, f)
     model = MolNet(**model_config).to(device)
+    initialize_weights(model)
 
 # get optimizer and scheduler and define loss
 optimizer, scheduler = get_optimizer_and_scheduler(args, model, len(train_loader.dataset))
