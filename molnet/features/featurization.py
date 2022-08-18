@@ -53,7 +53,7 @@ def atom_features(atom: Chem.rdchem.Atom) -> List[Union[bool, int, float]]:
     else:
         fatom = onek_encoding_unk(atom.GetSymbol(), ATOM_FEATURES['atomic_symbol']) + \
                onek_encoding_unk(atom.GetTotalDegree(), ATOM_FEATURES['degree']) + \
-               onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge'] + \
+               onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge']) + \
                onek_encoding_unk(int(atom.GetTotalNumHs()), ATOM_FEATURES['num_Hs']) + \
                onek_encoding_unk(int(atom.GetHybridization()), ATOM_FEATURES['hybridization']) + \
                [1 if atom.GetIsAromatic() else 0] + \
