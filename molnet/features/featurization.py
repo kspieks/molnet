@@ -67,7 +67,7 @@ def atom_features(atom: Chem.rdchem.Atom) -> List[Union[bool, int, float]]:
                 atom.IsInRingSize(6),
                 atom.IsInRingSize(7),
             ]
- 
+
     return fatom
 
 
@@ -100,7 +100,7 @@ def bond_features(bond: Chem.rdchem.Bond) -> List[Union[bool, int, float]]:
             (bond.IsInRingSize(6) if bt is not None else 0),
             (bond.IsInRingSize(7) if bt is not None else 0),
         ]
-        
+   
     return fbond
 
 
