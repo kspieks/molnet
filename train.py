@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 
 from molnet.features.data import construct_loader
-from molnet.model.model import GNN
+from molnet.model.model import MolNet
 from molnet.model.nn_utils import (NoamLR,
                                    get_optimizer_and_scheduler,
                                    param_count,
@@ -50,7 +50,7 @@ if args.model_config and args.state_dict:
     # if fine-tuning, load in previous weights
     with open(args.model_config, 'r') as f:
         model_config = json.load(f)
-    model = GNN(**model_config).to(device)
+    model = MolNet(**model_config).to(device)
     model.load_state_dict(torch.load(args.state_dict, map_location=device))
 else:
     # otherwise, create a fresh model and save the model arguments
@@ -59,7 +59,7 @@ else:
     model_config['num_edge_features'] = train_loader.dataset.edge_dim
     with open('model_config.json', 'w') as f:
         json.dump(model_config, f)
-    model = GNN(**model_config).to(device)
+    model = MolNet(**model_config).to(device)
 
 # get optimizer and scheduler and define loss
 optimizer, scheduler = get_optimizer_and_scheduler(args, model, len(train_loader.dataset))
@@ -104,7 +104,7 @@ logger.info(f'\nCompleted {args.n_epochs} epochs. Done with training.\n')
 logger.info(f'Best Overall Validation RMSE {best_val_rmse:.5f} on Epoch {best_epoch}')
 
 # load best model
-model = GNN(**model_config).to(device)
+model = MolNet(**model_config).to(device)
 state_dict = torch.load(os.path.join(args.log_dir, 'best_model.pt'), map_location=device)
 model.load_state_dict(state_dict)
 

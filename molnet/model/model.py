@@ -23,9 +23,6 @@ class GNN(nn.Module):
                  aggregation_norm=None,
                  dropout=0.0,
                  act_func='SiLU',
-                 ffn_depth=3,
-                 ffn_hidden_size=300,
-                 num_targets=1,
                  ):
         super(GNN, self).__init__()
 
@@ -67,29 +64,6 @@ class GNN(nn.Module):
             self.pool = global_max_pool
         else:
             raise ValueError("Invalid graph pooling type.")
-
-        # ffn layers
-        ffn = []
-        if ffn_depth == 1:
-            ffn.append(self.dropout)
-            ffn.append(nn.Linear(self.gnn_hidden_size, num_targets))
-        else:
-            ffn.append(self.dropout)
-            ffn.append(nn.Linear(self.gnn_hidden_size, ffn_hidden_size))
-
-            for _ in range(ffn_depth - 2):
-                ffn.extend([
-                    self.activation,
-                    self.dropout,
-                    nn.Linear(ffn_hidden_size, ffn_hidden_size),
-                ])
-
-            ffn.extend([
-                self.activation,
-                self.dropout,
-                nn.Linear(ffn_hidden_size, num_targets),
-            ])
-        self.ffn = nn.Sequential(*ffn)
 
     def forward(self, data):
         # unpack data object
@@ -133,9 +107,72 @@ class GNN(nn.Module):
         if self.gnn_type == 'dmpnn':
             h, _ = self.edge_to_node(x_list[-1], edge_index, h)
 
+        # aggregate atomic representations into molecular representations
         if self.aggregation_norm:
             h = self.pool(h, batch) / self.aggregation_norm
         else:
             h = self.pool(h, batch)
 
-        return self.ffn(h)
+        return h
+
+
+class MolNet(nn.Module):
+    def __init__(self,
+                 num_node_features,
+                 num_edge_features,
+                 gnn_depth=3,
+                 gnn_hidden_size=300,
+                 gnn_type='dmpnn',
+                 gat_heads=1,
+                 graph_pool='sum',
+                 aggregation_norm=None,
+                 dropout=0.0,
+                 act_func='SiLU',
+                 ffn_depth=3,
+                 ffn_hidden_size=300,
+                 num_targets=1,
+                 ):
+        super(MolNet, self).__init__()
+
+        self.dropout = nn.Dropout(dropout)
+        self.activation = get_activation_function(act_func)
+
+        self.encoder = GNN(num_node_features,
+                           num_edge_features,
+                           gnn_depth,
+                           gnn_hidden_size,
+                           gnn_type,
+                           gat_heads,
+                           graph_pool,
+                           aggregation_norm,
+                           dropout,
+                           act_func,
+                           )
+
+        # ffn layers
+        ffn = []
+        if ffn_depth == 1:
+            ffn.append(self.dropout)
+            ffn.append(nn.Linear(gnn_hidden_size, num_targets))
+        else:
+            ffn.append(self.dropout)
+            ffn.append(nn.Linear(gnn_hidden_size, ffn_hidden_size))
+
+            for _ in range(ffn_depth - 2):
+                ffn.extend([
+                    self.activation,
+                    self.dropout,
+                    nn.Linear(ffn_hidden_size, ffn_hidden_size),
+                ])
+
+            ffn.extend([
+                self.activation,
+                self.dropout,
+                nn.Linear(ffn_hidden_size, num_targets),
+            ])
+        self.ffn = nn.Sequential(*ffn)
+
+    def forward(self, data):
+        output = self.encoder(data)
+
+        return self.ffn(output)
