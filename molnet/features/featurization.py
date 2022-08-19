@@ -7,7 +7,6 @@ ATOM_FEATURES = {
     'atomic_symbol': ATOMIC_SYMBOLS,
     'degree': [0, 1, 2, 3, 4, 5],
     'formal_charge': [-1, -2, 0, 1, 2],
-    'chiral_tag': [0, 1, 2, 3],
     'num_Hs': [0, 1, 2, 3, 4],
     'hybridization': [
         Chem.rdchem.HybridizationType.SP,
@@ -53,12 +52,12 @@ def atom_features(atom: Chem.rdchem.Atom) -> List[Union[bool, int, float]]:
 
     else:
         fatom = onek_encoding_unk(atom.GetSymbol(), ATOM_FEATURES['atomic_symbol']) + \
-               onek_encoding_unk(atom.GetTotalDegree(), ATOM_FEATURES['degree']) + \
-               onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge'])
-        fatom +=  onek_encoding_unk(int(atom.GetTotalNumHs()), ATOM_FEATURES['num_Hs']) + \
-               onek_encoding_unk(int(atom.GetHybridization()), ATOM_FEATURES['hybridization']) + \
-               [1 if atom.GetIsAromatic() else 0] + \
-               [atom.GetMass() * 0.01]  # scaled to about the same range as other features
+                onek_encoding_unk(atom.GetTotalDegree(), ATOM_FEATURES['degree']) + \
+                onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge']) + \
+                onek_encoding_unk(int(atom.GetTotalNumHs()), ATOM_FEATURES['num_Hs']) + \
+                onek_encoding_unk(int(atom.GetHybridization()), ATOM_FEATURES['hybridization']) + \
+                [1 if atom.GetIsAromatic() else 0] + \
+                [atom.GetMass() * 0.01]  # scaled to about the same range as other features
 
         fatom += [
                 atom.IsInRing(),
