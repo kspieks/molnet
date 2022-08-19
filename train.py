@@ -38,9 +38,9 @@ for arg in vars(args):
 
 # construct dataloaders and scaler
 train_loader, val_loader, test_loader = construct_loader(args, modes=('train', 'val', 'test'))
-print(f'\nTraining mean +- 1 std: {train_loader.dataset.mean} +- {train_loader.dataset.std}')
-print(f'Validation mean +- 1 std: {val_loader.dataset.mean} +- {val_loader.dataset.std}')
-print(f'Testing mean +- 1 std: {test_loader.dataset.mean} +- {test_loader.dataset.std}\n')
+logger.info(f'\nTraining mean +- 1 std: {train_loader.dataset.mean} +- {train_loader.dataset.std}')
+logger.info(f'Validation mean +- 1 std: {val_loader.dataset.mean} +- {val_loader.dataset.std}')
+logger.info(f'Testing mean +- 1 std: {test_loader.dataset.mean} +- {test_loader.dataset.std}\n')
 scaler = TorchStandardScaler()
 targets = torch.tensor(train_loader.dataset.targets, requires_grad=False)
 scaler.fit(targets)
