@@ -23,6 +23,12 @@ def parse_command_line_arguments(command_line_args=None):
     parser.add_argument('--split_path', type=str,
                         help='Path to .npy file with train, val, and test indices.')
 
+    parser.add_argument('--model_config', type=str,
+                        help='Path to json file containing model parameters. Used when fine-tuning.')
+
+    parser.add_argument('--state_dict', type=str,
+                        help='Path to model checkpoint (.pt file). Used when fine-tuning.')
+
     parser.add_argument('--targets', nargs='+',
                         help='Name of columns to use as target labels.')
 

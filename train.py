@@ -45,13 +45,21 @@ scaler = TorchStandardScaler()
 targets = torch.tensor(train_loader.dataset.targets, requires_grad=False)
 scaler.fit(targets)
 
-# save the model arguments
-model_config = config_dict['model_config']
-model_config['num_node_features'] = train_loader.dataset.node_dim
-model_config['num_edge_features'] = train_loader.dataset.edge_dim
-with open('model_config.json', 'w') as f:
-    json.dump(model_config, f)
-model = GNN(**model_config).to(device)
+# build model
+if args.model_config and args.state_dict:
+    # if fine-tuning, load in previous weights
+    with open(args.model_config, 'r') as f:
+        model_config = json.load(f)
+    model = GNN(**model_config).to(device)
+    model.load_state_dict(torch.load(args.state_dict, map_location=device))
+else:
+    # otherwise, create a fresh model and save the model arguments
+    model_config = config_dict['model_config']
+    model_config['num_node_features'] = train_loader.dataset.node_dim
+    model_config['num_edge_features'] = train_loader.dataset.edge_dim
+    with open('model_config.json', 'w') as f:
+        json.dump(model_config, f)
+    model = GNN(**model_config).to(device)
 
 # get optimizer and scheduler and define loss
 optimizer, scheduler = get_optimizer_and_scheduler(args, model, len(train_loader.dataset))
