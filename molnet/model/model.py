@@ -53,8 +53,6 @@ class GNN(nn.Module):
                                             heads=gat_heads,
                                             edge_dim=self.gnn_hidden_size)
                 )
-            else:
-                raise ValueError(f'Undefined GNN type called {self.gnn_type}')
 
         if self.graph_pool == "sum":
             self.pool = global_add_pool
