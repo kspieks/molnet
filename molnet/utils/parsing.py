@@ -45,37 +45,38 @@ def parse_command_line_arguments(command_line_args=None):
     # model arguments
     model_config = parser.add_argument_group('model_config')
     model_config.add_argument('--gnn_type', type=str, default='dmpnn',
-                        choices=['dmpnn', 'gatv2'],
-                        help="Type of GNN to use.")
+                              choices=['dmpnn', 'gatv2'],
+                              help="Type of GNN to use.")
 
     model_config.add_argument('--gat_heads', type=int, default=1,
-                        help='Number of attention heads.')
+                              help='Number of attention heads.')
 
     model_config.add_argument('--gnn_hidden_size', type=int, default=300,
-                        help='Dimensionality of hidden layers in MPN.')
+                              help='Dimensionality of hidden layers in MPN.')
 
     model_config.add_argument('--gnn_depth', type=int, default=3,
-                        help='Number of message passing steps.')
+                              help='Number of message passing steps.')
 
     model_config.add_argument('--graph_pool', type=str, default='sum',
-                        choices=['sum', 'mean', 'max'],
-                        help='How to aggregate atom representations to molecule representation.')
+                              choices=['sum', 'mean', 'max'],
+                              help='How to aggregate atom representations to molecule representation.')
 
     model_config.add_argument('--aggregation_norm', type=int, default=None,  # use 50
-                        help='Number by which to divide summed up atomic features.')
+                              help='Number by which to divide summed up atomic features.')
 
     model_config.add_argument('--ffn_depth', type=int, default=3,
-                        help='Number of layers in FFN after MPN encoding.')
+                              help='Number of layers in FFN after MPN encoding.')
 
     model_config.add_argument('--ffn_hidden_size', type=int, default=None,
-                        help='Hidden dim for higher-capacity FFN (defaults to gnn_hidden_size).')
+                              help='Hidden dim for higher-capacity FFN (defaults to gnn_hidden_size).')
 
     model_config.add_argument('--dropout', type=float, default=0,
-                        help='Dropout probability.')
+                             help='Dropout probability.')
 
     model_config.add_argument('--act_func', type=str, default='SiLU',
-                        choices=['ReLU', 'ELU', 'LeakyReLU', 'SiLU', 'SELU', 'GELU'],
-                        help='Activation function.')
+                              choices=['ReLU', 'ELU', 'LeakyReLU',
+                                       'SiLU', 'SELU', 'GELU'],
+                              help='Activation function.')
 
     # training arguments
     parser.add_argument('--num_workers', type=int, default=0,

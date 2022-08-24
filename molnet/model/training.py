@@ -86,7 +86,7 @@ def test(model, loader, scaler, device):
             mae_total += (preds - data.y).abs().sum(dim=0).detach().cpu()
 
     # divide by number of molecules
-    val_rmse = torch.sqrt(rmse_total / len(loader.dataset)) # rmse with units
-    val_mae = mae_total / len(loader.dataset)               # mae with units
+    val_rmse = torch.sqrt(rmse_total / len(loader.dataset))  # rmse with units
+    val_mae = mae_total / len(loader.dataset)                # mae with units
 
     return val_rmse, val_mae, preds_all

@@ -52,21 +52,21 @@ def atom_features(atom: Chem.rdchem.Atom) -> List[Union[bool, int, float]]:
 
     else:
         fatom = onek_encoding_unk(atom.GetSymbol(), ATOM_FEATURES['atomic_symbol']) + \
-                onek_encoding_unk(atom.GetTotalDegree(), ATOM_FEATURES['degree']) + \
-                onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge']) + \
-                onek_encoding_unk(int(atom.GetTotalNumHs()), ATOM_FEATURES['num_Hs']) + \
-                onek_encoding_unk(int(atom.GetHybridization()), ATOM_FEATURES['hybridization']) + \
-                [1 if atom.GetIsAromatic() else 0] + \
-                [atom.GetMass() * 0.01]  # scaled to about the same range as other features
+            onek_encoding_unk(atom.GetTotalDegree(), ATOM_FEATURES['degree']) + \
+            onek_encoding_unk(atom.GetFormalCharge(), ATOM_FEATURES['formal_charge']) + \
+            onek_encoding_unk(int(atom.GetTotalNumHs()), ATOM_FEATURES['num_Hs']) + \
+            onek_encoding_unk(int(atom.GetHybridization()), ATOM_FEATURES['hybridization']) + \
+            [1 if atom.GetIsAromatic() else 0] + \
+            [atom.GetMass() * 0.01]  # scaled to about the same range as other features
 
         fatom += [
-                atom.IsInRing(),
-                atom.IsInRingSize(3),
-                atom.IsInRingSize(4),
-                atom.IsInRingSize(5),
-                atom.IsInRingSize(6),
-                atom.IsInRingSize(7),
-            ]
+            atom.IsInRing(),
+            atom.IsInRingSize(3),
+            atom.IsInRingSize(4),
+            atom.IsInRingSize(5),
+            atom.IsInRingSize(6),
+            atom.IsInRingSize(7),
+        ]
 
     return fatom
 

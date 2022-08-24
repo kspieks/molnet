@@ -117,7 +117,7 @@ class MolGraph:
                 )
             self.n_atoms = rmol.GetNumAtoms()
 
-            if (not any(a.GetAtomMapNum() for a in rmol.GetAtoms()) or 
+            if (not any(a.GetAtomMapNum() for a in rmol.GetAtoms()) or
                 not any(a.GetAtomMapNum() for a in pmol.GetAtoms())):
                 # these were not atom-mapped smiles
                 raise Exception(
