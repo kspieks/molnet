@@ -142,10 +142,13 @@ class MolGraph:
             # get bond features
             for a1 in range(self.n_atoms):
                 for a2 in range(a1 + 1, self.n_atoms):
-                    rdkit_idx1 = r_atoms[a1].GetIdx()
-                    rdkit_idx2 = r_atoms[a2].GetIdx()
-                    bond_reac = rmol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
-                    bond_prod = pmol.GetBondBetweenAtoms(rdkit_idx1, rdkit_idx2)
+                    reac_rdkit_idx1 = r_atoms[a1].GetIdx()
+                    reac_rdkit_idx2 = r_atoms[a2].GetIdx()
+                    bond_reac = rmol.GetBondBetweenAtoms(reac_rdkit_idx1, reac_rdkit_idx2)
+
+                    prod_rdkit_idx1 = p_atoms[a1].GetIdx()
+                    prod_rdkit_idx2 = p_atoms[a2].GetIdx()
+                    bond_prod = pmol.GetBondBetweenAtoms(prod_rdkit_idx1, prod_rdkit_idx2)
 
                     if bond_reac is None and bond_prod is None:
                         continue
