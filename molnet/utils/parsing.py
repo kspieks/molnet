@@ -121,6 +121,6 @@ def parse_command_line_arguments(command_line_args=None):
     config_dict['model_config']['num_targets'] = len(args.targets)
 
     if args.gnn_type not in ['dmpnn', 'gatv2']:
-        raise ValueError(f"Undefined GNN type called {model_config['gnn_type']}")
+        raise ValueError(f"Undefined GNN type called {args.gnn_type}")
 
     return args, config_dict
