@@ -43,16 +43,16 @@ class GNN(nn.Module):
             self.edge_init = nn.Linear(num_edge_features, self.gnn_hidden_size)
 
         # gnn layers
-        self.convs = torch.nn.ModuleList()
-        for _ in range(self.gnn_depth):
-            if self.gnn_type == 'dmpnn':
-                self.convs.append(DMPNNConv(gnn_hidden_size=self.gnn_hidden_size))
-            elif self.gnn_type == 'gatv2':
-                self.convs.append(GATv2Conv(in_channels=self.gnn_hidden_size,
-                                            out_channels=self.gnn_hidden_size,
-                                            heads=gat_heads,
-                                            edge_dim=self.gnn_hidden_size)
-                )
+        # share weights across graph convolution layers
+        if self.gnn_type == 'dmpnn':
+            self.conv = DMPNNConv(gnn_hidden_size=self.gnn_hidden_size)
+        elif self.gnn_type == 'gatv2':
+            self.conv = GATv2Conv(
+                in_channels=self.gnn_hidden_size,
+                out_channels=self.gnn_hidden_size,
+                heads=gat_heads,
+                edge_dim=self.gnn_hidden_size,
+            )
 
         if self.graph_pool == "sum":
             self.pool = global_add_pool
@@ -82,10 +82,10 @@ class GNN(nn.Module):
         # graph convolutions
         for l in range(self.gnn_depth):
             if self.gnn_type == 'gatv2':
-                x_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
+                x_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
             else:
                 # dmpnn passes messages along the edges
-                x_h, edge_attr_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
+                x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
 
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 
