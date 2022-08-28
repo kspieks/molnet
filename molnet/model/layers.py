@@ -45,7 +45,7 @@ def index_select_ND(source: torch.Tensor, index: torch.Tensor) -> torch.Tensor:
 
 class DMPNNConv2(nn.Module):
     def __init__(self, gnn_hidden_size=300):
-        super(DMPNNConv2, self)
+        super(DMPNNConv2, self).__init__()
         self.lin = nn.Linear(gnn_hidden_size, gnn_hidden_size)
         self.batchnorm = nn.BatchNorm1d(gnn_hidden_size)
         self.act_func = nn.ReLU()
