@@ -86,7 +86,7 @@ class GNN(nn.Module):
             else:
                 # dmpnn passes messages along the edges
                 a2b, b2a, b2revb = data.a2b, data.b2a, data.b2revb
-                x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1], edge_attr, a2b, b2a, b2revb)
+                x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1], a2b, b2a, b2revb)
 
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 

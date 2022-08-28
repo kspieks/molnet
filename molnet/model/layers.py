@@ -50,7 +50,7 @@ class DMPNNConv2(nn.Module):
         self.batchnorm = nn.BatchNorm1d(gnn_hidden_size)
         self.act_func = nn.ReLU()
 
-    def forward(self, x, edge_index, edge_attr, input, a2b, b2a, b2revb):
+    def forward(self, x, edge_index, edge_attr, a2b, b2a, b2revb):
         message = edge_attr
 
         nei_a_message = index_select_ND(message, a2b)  # num_atoms x max_num_bonds x hidden
