@@ -7,7 +7,7 @@ from torch_geometric.nn import (GATv2Conv,
                                 global_mean_pool,
                                 )
 
-from .layers import DMPNNConv
+from .layers import DMPNNConv2
 from .nn_utils import get_activation_function
 
 
@@ -37,7 +37,7 @@ class GNN(nn.Module):
 
         if self.gnn_type == 'dmpnn':
             self.edge_init = nn.Linear(num_node_features + num_edge_features, self.gnn_hidden_size)
-            self.edge_to_node = DMPNNConv(gnn_hidden_size=self.gnn_hidden_size)
+            self.edge_to_node = DMPNNConv2(gnn_hidden_size=self.gnn_hidden_size)
         else:
             self.node_init = nn.Linear(num_node_features, self.gnn_hidden_size)
             self.edge_init = nn.Linear(num_edge_features, self.gnn_hidden_size)
@@ -45,7 +45,7 @@ class GNN(nn.Module):
         # gnn layers
         # share weights across graph convolution layers
         if self.gnn_type == 'dmpnn':
-            self.conv = DMPNNConv(gnn_hidden_size=self.gnn_hidden_size)
+            self.conv = DMPNNConv2(gnn_hidden_size=self.gnn_hidden_size)
         elif self.gnn_type == 'gatv2':
             self.conv = GATv2Conv(
                 in_channels=self.gnn_hidden_size,
@@ -85,7 +85,8 @@ class GNN(nn.Module):
                 x_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
             else:
                 # dmpnn passes messages along the edges
-                x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
+                a2b, b2a, b2revb = data.a2b, data.b2a, data.b2revb
+                x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1], edge_attr, a2b, b2a, b2revb)
 
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 

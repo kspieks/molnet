@@ -79,6 +79,10 @@ class MolGraph:
             atoms = sorted(mol.GetAtoms(), key=lambda a: a.GetAtomMapNum())
             self.f_atoms = [atom_features(atom) for atom in atoms]
 
+            # Initialize atom to bond mapping for each atom
+            for _ in range(self.n_atoms):
+                self.a2b.append([])
+
             # add self loop to account for smiles that only have 1 atom
             if mol.GetNumBonds() == 0:
                 self.edge_index.extend([(0, 0), (0, 0)])
@@ -97,6 +101,15 @@ class MolGraph:
 
                     # create directional graph
                     self.edge_index.extend([(a1, a2), (a2, a1)])
+                    # Update index mappings
+                    b1 = self.n_bonds
+                    b2 = b1 + 1
+                    self.a2b[a2].append(b1)  # b1 = a1 --> a2
+                    self.b2a.append(a1)
+                    self.a2b[a1].append(b2)  # b2 = a2 --> a1
+                    self.b2a.append(a2)
+                    self.b2revb.append(b2)
+                    self.b2revb.append(b1)
                     self.n_bonds += 2
 
                     f_bond = bond_features(bond)
