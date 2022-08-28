@@ -255,9 +255,9 @@ class MolDataset(Dataset):
         data.y = torch.tensor([self.targets[key]], dtype=torch.float)
         data.smiles = self.smiles[key]
 
-        data.a2b = molgraph.a2b
-        data.b2a = molgraph.b2a
-        data.b2revb = molgraph.b2revb
+        data.a2b = torch.tensor(molgraph.a2b, dtype=torch.long)
+        data.b2a = torch.tensor(molgraph.b2a, dtype=torch.long)
+        data.b2revb = torch.tensor(molgraph.b2revb, dtype=torch.long)
 
         return data
 
