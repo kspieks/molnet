@@ -255,6 +255,10 @@ class MolDataset(Dataset):
         data.y = torch.tensor([self.targets[key]], dtype=torch.float)
         data.smiles = self.smiles[key]
 
+        data.a2b = molgraph.a2b
+        data.b2a = molgraph.b2a
+        data.b2revb = molgraph.b2revb
+
         return data
 
     def process_key(self, key):
