@@ -95,10 +95,10 @@ class GNN(nn.Module):
                 h = self.dropout(self.activation(h))
 
             if self.gnn_type == 'dmpnn':
-                h = h + edge_attr_h
+                h = h + edge_attr
                 edge_attr_list.append(h)
             else:
-                h = h + x_h
+                h = h + x
                 x_list.append(h)
 
         # dmpnn edge -> node aggregation
