@@ -90,10 +90,8 @@ class GNN(nn.Module):
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 
             if self.gnn_type == 'dmpnn':
-                h = h + edge_attr
                 edge_attr_list.append(h)
             else:
-                h = h + x
                 x_list.append(h)
             
             h = self.dropout(self.activation(h))
