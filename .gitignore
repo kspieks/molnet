@@ -19,3 +19,7 @@
 # egg files (pip install -e)
 *.egg-info/*
 
+# Compiled Python modules
+*.pyc
+*.so
+*.pyd
