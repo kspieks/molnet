@@ -57,6 +57,9 @@ def parse_command_line_arguments(command_line_args=None):
     model_config.add_argument('--gnn_depth', type=int, default=3,
                               help='Number of message passing steps.')
 
+    model_config.add_argument('--share_gnn_weights',  action='store_true', default=False,
+                              help='Boolean indicating whether to share weights across graph convolutional layers.')
+
     model_config.add_argument('--graph_pool', type=str, default='sum',
                               choices=['sum', 'mean', 'max'],
                               help='How to aggregate atom representations to molecule representation.')

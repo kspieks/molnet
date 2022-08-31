@@ -17,6 +17,7 @@ class GNN(nn.Module):
                  num_edge_features,
                  gnn_depth=3,
                  gnn_hidden_size=300,
+                 share_weights=True,
                  gnn_type='dmpnn',
                  gat_heads=1,
                  graph_pool='sum',
@@ -28,6 +29,7 @@ class GNN(nn.Module):
 
         self.gnn_depth = gnn_depth
         self.gnn_hidden_size = gnn_hidden_size
+        self.share_weights = share_weights
         self.gnn_type = gnn_type
         self.graph_pool = graph_pool
         self.aggregation_norm = aggregation_norm
@@ -43,16 +45,28 @@ class GNN(nn.Module):
             self.edge_init = nn.Linear(num_edge_features, self.gnn_hidden_size)
 
         # gnn layers
-        self.convs = torch.nn.ModuleList()
-        for _ in range(self.gnn_depth):
+        if self.share_weights:
+            # share weights across graph convolution layers
             if self.gnn_type == 'dmpnn':
-                self.convs.append(DMPNNConv(gnn_hidden_size=self.gnn_hidden_size))
+                self.conv = DMPNNConv(gnn_hidden_size=self.gnn_hidden_size)
             elif self.gnn_type == 'gatv2':
-                self.convs.append(GATv2Conv(in_channels=self.gnn_hidden_size,
-                                            out_channels=self.gnn_hidden_size,
-                                            heads=gat_heads,
-                                            edge_dim=self.gnn_hidden_size)
+                self.conv = GATv2Conv(
+                    in_channels=self.gnn_hidden_size,
+                    out_channels=self.gnn_hidden_size,
+                    heads=gat_heads,
+                    edge_dim=self.gnn_hidden_size,
                 )
+        else:
+            self.convs = torch.nn.ModuleList()
+            for _ in range(self.gnn_depth):
+                if self.gnn_type == 'dmpnn':
+                    self.convs.append(DMPNNConv(gnn_hidden_size=self.gnn_hidden_size))
+                elif self.gnn_type == 'gatv2':
+                    self.convs.append(GATv2Conv(in_channels=self.gnn_hidden_size,
+                                                out_channels=self.gnn_hidden_size,
+                                                heads=gat_heads,
+                                                edge_dim=self.gnn_hidden_size)
+                    )
 
         if self.graph_pool == "sum":
             self.pool = global_add_pool
@@ -81,11 +95,18 @@ class GNN(nn.Module):
 
         # graph convolutions
         for l in range(self.gnn_depth):
-            if self.gnn_type == 'gatv2':
-                x_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
+            if self.share_weights:
+                if self.gnn_type == 'gatv2':
+                    x_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
+                else:
+                    # dmpnn passes messages along the edges
+                    x_h, edge_attr_h = self.conv(x_list[-1], edge_index, edge_attr_list[-1])
             else:
-                # dmpnn passes messages along the edges
-                x_h, edge_attr_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
+                if self.gnn_type == 'gatv2':
+                    x_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
+                else:
+                    # dmpnn passes messages along the edges
+                    x_h, edge_attr_h = self.convs[l](x_list[-1], edge_index, edge_attr_list[-1])
 
             h = edge_attr_h if self.gnn_type == 'dmpnn' else x_h
 
@@ -118,6 +139,7 @@ class MolNet(nn.Module):
                  num_edge_features,
                  gnn_depth=3,
                  gnn_hidden_size=300,
+                 share_gnn_weights=True,
                  gnn_type='dmpnn',
                  gat_heads=1,
                  graph_pool='sum',
@@ -137,6 +159,7 @@ class MolNet(nn.Module):
                            num_edge_features,
                            gnn_depth,
                            gnn_hidden_size,
+                           share_gnn_weights,
                            gnn_type,
                            gat_heads,
                            graph_pool,
