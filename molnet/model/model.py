@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 from torch_geometric.nn import (GATv2Conv,
                                 global_add_pool,
                                 global_max_pool,
@@ -87,7 +86,7 @@ class GNN(nn.Module):
             edge_attr = torch.cat([x[row], edge_attr], dim=1)
             edge_attr = self.activation(self.edge_init(edge_attr))
         else:
-            x = F.relu(self.node_init(x))
+            x = self.activation(self.node_init(x))
             edge_attr = self.activation(self.edge_init(edge_attr))
 
         x_list = [x]
