@@ -101,6 +101,7 @@ class GNN(nn.Module):
         # dmpnn edge -> node aggregation
         if self.gnn_type == 'dmpnn':
             h, _ = self.edge_to_node(x_list[-1], edge_index, h)
+            h = self.dropout(self.activation(h))
 
         # aggregate atomic representations into molecular representations
         if self.aggregation_norm:
