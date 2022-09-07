@@ -8,7 +8,7 @@ import torch
 import torch_geometric as tg
 from torch_geometric.data import DataLoader, Dataset
 
-from .featurization import atom_features, bond_features
+from .featurization import ATOMIC_SYMBOLS, atom_features, bond_features
 
 def make_rdkitmol(smi: str, remove_Hs=True, add_Hs=False):
     """
@@ -137,7 +137,7 @@ class MolGraph:
             f_atoms_diff = [list(map(lambda x, y: y - x, ii, jj)) for ii, jj in zip(f_atoms_reac, f_atoms_prod)]
 
             # reac_diff mode
-            self.f_atoms = [x + y for x, y in zip(f_atoms_reac, f_atoms_diff)]
+            self.f_atoms = [x + y[len(ATOMIC_SYMBOLS)+1:] for x, y in zip(f_atoms_reac, f_atoms_diff)]
 
             # get bond features
             for a1 in range(self.n_atoms):
