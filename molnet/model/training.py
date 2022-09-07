@@ -125,19 +125,20 @@ def test(model, loader, scaler, device):
     rmse_total, mae_total = 0, 0
     preds_all = []
 
-    scaler.to(device)
     with torch.no_grad():
         for data in tqdm(loader):
             data = data.to(device)
             out = model(data)
-            preds = scaler.inverse_transform(out)
-            preds_all.extend(preds.cpu().detach().tolist())
+            preds = scaler.inverse_transform(out.cpu().detach().numpy())
+            preds_all.extend(preds.tolist())
 
-            rmse_total += (preds - data.y).square().sum(dim=0).detach().cpu()
-            mae_total += (preds - data.y).abs().sum(dim=0).detach().cpu()
+            X = np.array(preds).astype(float)
+            preds = torch.tensor(X, dtype=torch.float32, requires_grad=False)
+            rmse_total += (preds - data.y.detach().cpu()).square().sum(dim=0)
+            mae_total += (preds - data.y.detach().cpu()).abs().sum(dim=0)
 
     # divide by number of molecules
-    val_rmse = torch.sqrt(rmse_total / len(loader.dataset))  # rmse with units
+    val_rmse = np.sqrt(rmse_total / len(loader.dataset))  # rmse with units
     val_mae = mae_total / len(loader.dataset)                # mae with units
 
     return val_rmse, val_mae, preds_all
