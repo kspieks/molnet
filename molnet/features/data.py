@@ -8,6 +8,7 @@ import torch
 import torch_geometric as tg
 from torch_geometric.data import DataLoader, Dataset
 
+from molnet.utils.utils import TorchStandardScaler, StandardScaler
 from .featurization import ATOMIC_SYMBOLS, atom_features, bond_features
 
 def make_rdkitmol(smi: str, remove_Hs=True, add_Hs=False):
@@ -181,8 +182,8 @@ class MolDataset(Dataset):
         super(MolDataset, self).__init__()
 
         self.args = args
-
-        self.split_idx = 0 if mode == 'train' else 1 if mode == 'val' else 2
+        self.mode = mode
+        self.split_idx = 0 if self.mode == 'train' else 1 if self.mode == 'val' else 2
         self.split = np.load(self.args.split_path, allow_pickle=True)[self.split_idx]
 
         self.smiles = self.get_smiles()
@@ -203,9 +204,14 @@ class MolDataset(Dataset):
     def get_targets(self):
         """Create list of targets"""
         df = pd.read_csv(self.args.data_path)
-        targets = df[self.args.targets].values.astype(np.float32)
-
-        return [targets[i] for i in self.split]
+        outputs = df[self.args.targets].values.astype(np.float32)
+        targets = [outputs[i] for i in self.split]
+        if self.mode == 'train':
+            self.scaler = StandardScaler().fit(targets)
+            scaled_targets = self.scaler.transform(targets).tolist()
+            return scaled_targets
+            
+        return targets
 
     def get_dims(self):
         """Get input dimensions for the node and edge features"""

@@ -12,7 +12,7 @@ from molnet.model.nn_utils import (NoamLR,
                                    param_count,
                                    set_seed,
                                    )
-from molnet.model.training import test, train
+from molnet.model.training import test, train, train_no_scaler
 from molnet.utils.parsing import parse_command_line_arguments
 from molnet.utils.utils import (TorchStandardScaler,
                                 create_logger,
@@ -41,9 +41,11 @@ train_loader, val_loader, test_loader = construct_loader(args, modes=('train', '
 logger.info(f'\nTraining mean +- 1 std: {train_loader.dataset.mean} +- {train_loader.dataset.std}')
 logger.info(f'Validation mean +- 1 std: {val_loader.dataset.mean} +- {val_loader.dataset.std}')
 logger.info(f'Testing mean +- 1 std: {test_loader.dataset.mean} +- {test_loader.dataset.std}\n')
-scaler = TorchStandardScaler()
-targets = torch.tensor(train_loader.dataset.targets, requires_grad=False)
-scaler.fit(targets)
+
+scaler = train_loader.dataset.scaler
+logger.info(f'type(scaler): {type(scaler)}')
+logger.info(f'scaler.means: {scaler.means}')
+logger.info(f'scaler.stds: {scaler.stds}')
 
 # build model
 if args.model_config and args.state_dict:
@@ -82,7 +84,7 @@ best_epoch = 0
 
 logger.info("Starting training...")
 for epoch in range(1, args.n_epochs+1):
-    train_rmse, train_mae = train(model, train_loader, optimizer, loss, scaler, device, args.max_grad_norm, scheduler, logger)
+    train_rmse, train_mae = train_no_scaler(model, train_loader, optimizer, loss, device, args.max_grad_norm, scheduler, logger)
     logger.info(f'Epoch {epoch}: Overall Training RMSE/MAE {train_rmse.mean():.5f}/{train_mae.mean():.5f}')
     for target, rmse, mae in zip(args.targets, train_rmse, train_mae):
         logger.info(f'Epoch {epoch}: {target} Training RMSE/MAE {rmse:.5f}/{mae:.5f}')
